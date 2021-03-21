@@ -1,0 +1,4 @@
+*.o
+
+/config.h
+/pe32ping_example.test
