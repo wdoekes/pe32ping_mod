@@ -37,6 +37,7 @@ const char pingmon_host0[] = "example.com";
 #endif
 
 #include "PingMon.h"
+#include "PingMonUtil.h"
 
 
 static void ensure_wifi();
@@ -45,9 +46,6 @@ static void ensure_mqtt();
 static void pingmon_init();
 static void pingmon_update();
 static void pingmon_publish();
-static String pingmon_whats_my_ip();
-static String pingmon_whats_my_ext_gateway();
-static String pingmon_whats_my_int_gateway();
 
 #ifdef HAVE_WIFI
 WiFiClient wifiClient;
@@ -134,11 +132,28 @@ static void ensure_mqtt()
 
 static void pingmon_init()
 {
+  /* Take Cloudflare DNS */
   pingmon.addTarget("dns.cfl", "1.1.1.1");
+  /* Take Google DNS */
   pingmon.addTarget("dns.ggl", "8.8.8.8");
-  pingmon.addTarget("ip.ext", pingmon_whats_my_ip);
-  pingmon.addTarget("gw.ext", pingmon_whats_my_ext_gateway);
-  pingmon.addTarget("gw.int", pingmon_whats_my_int_gateway);
+  /* Fetch external IP from whatsmyip/ifconfig.co service */
+  pingmon.addTarget("ip.ext", []() {
+    return pingmon_util_http_whatsmyip(pingmon_whatsmyip_url);
+  });
+  /* Fetch external Gateway, by replacing last octet of my IP with ".1" */
+  pingmon.addTarget("gw.ext", []() {
+    String ret = pingmon_util_http_whatsmyip(pingmon_whatsmyip_url);
+    int pos = ret.lastIndexOf('.'); // take last '.'
+    if (pos > 0) { ret.remove(pos + 1); ret += "1"; /* => x.x.x.1 */ }
+    return ret;
+  });
+  pingmon.addTarget("gw.int", []() {
+#ifdef HAVE_WIFI
+    return WiFi.gatewayIP().toString();
+#else
+    return String("192.168.1.1");
+#endif
+  });
   if (pingmon_host0) {
     pingmon.addTarget("host.0", pingmon_host0);
   }
@@ -187,63 +202,6 @@ static void pingmon_publish()
 
 #ifdef HAVE_MQTT
   mqttClient.endMessage();
-#endif
-}
-
-/**
- * Return 111.222.33.44 if that's my external IP.
- */
-static String pingmon_whats_my_ip()
-{
-    static String ret;
-    static long lastMs = 0;
-    const long cacheFor = (15 * 60 * 1000); // 15 minutes
-
-    if (lastMs == 0 || (millis() - lastMs) > cacheFor) {
-#ifdef HAVE_HTTPCLIENT
-        HTTPClient http;
-        http.begin(pingmon_whatsmyip_url);
-        int httpCode = http.GET();
-        if (httpCode >= 200 && httpCode < 300) {
-            String body = http.getString();
-            body.trim();
-            if (body.length()) {
-                ret = body;
-            }
-        }
-        http.end();
-#else
-        ret = "111.222.33.44";
-#endif
-        lastMs = millis();
-    }
-    return ret;
-}
-
-/**
- * If whats_my_ip is 111.222.33.44, then whats_my_ext_gateway is
- * 111.222.33.1.
- */
-static String pingmon_whats_my_ext_gateway()
-{
-    String ret = pingmon_whats_my_ip();
-    int pos = ret.lastIndexOf('.'); // take last '.'
-    if (pos > 0) {
-        ret.remove(pos + 1);
-        ret += "1"; // append "1", assume the gateway is at "x.x.x.1"
-    }
-    return ret;
-}
-
-/**
- * HACKS: assume there's a WiFi object floating around.
- */
-static String pingmon_whats_my_int_gateway()
-{
-#ifdef HAVE_MQTT
-    return WiFi.gatewayIP().toString();
-#else
-    return "192.168.1.1";
 #endif
 }
 

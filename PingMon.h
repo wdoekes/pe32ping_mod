@@ -12,17 +12,6 @@
 
 #include <Arduino.h>
 
-/* Include files specific to the platform (ESP8266, Arduino or TEST) */
-#if defined(ARDUINO_ARCH_ESP8266)
-# include <ESP8266HTTPClient.h>
-# define HAVE_HTTPCLIENT
-# define HAVE_GLOBALPINGER
-#elif defined(ARDUINO_ARCH_AVR)
-/* nothing yet */
-#elif defined(TEST_BUILD)
-/* nothing yet */
-#endif
-
 using GetHostnameFunc = String(void); // = function typedef
 
 
