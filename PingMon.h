@@ -103,7 +103,7 @@ public:
 
 class PingMon {
 private:
-    static const unsigned char _maxTargets = 6;
+    static const unsigned char _maxTargets = 8;
     unsigned char _nTargets;
     unsigned char _curTarget;
     PingTarget _dests[_maxTargets];
@@ -111,7 +111,7 @@ private:
 public:
     PingMon() : _nTargets(0), _curTarget(0) {}
 
-    const unsigned getTargetCount() const { return _nTargets; }
+    unsigned getTargetCount() const { return _nTargets; }
     template<class T> void addTarget(const char *name, T hostnameOrFunc) {
         if (_nTargets >= _maxTargets)
             return;

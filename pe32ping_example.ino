@@ -18,6 +18,7 @@ const char pingmon_host0[] = "example.com";
 # include <Arduino.h> /* Serial, pinMode, INPUT, OUTPUT, ... */
 # include <SoftwareSerial.h>
 # define HAVE_MQTT
+# define HAVE_WIFI
 #elif defined(ARDUINO_ARCH_AVR)
 # include <Arduino.h> /* Serial, pinMode, INPUT, OUTPUT, ... */
 # include <CustomSoftwareSerial.h>
@@ -31,9 +32,11 @@ const char pingmon_host0[] = "example.com";
 #endif
 
 /* Include files specific to Wifi/MQTT */
-#ifdef HAVE_MQTT
-# include <ArduinoMqttClient.h>
+#ifdef HAVE_WIFI
 # include <ESP8266WiFi.h>
+# ifdef HAVE_MQTT
+#  include <ArduinoMqttClient.h>
+# endif
 #endif
 
 #include "PingMon.h"

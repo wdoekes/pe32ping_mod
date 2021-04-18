@@ -1,5 +1,9 @@
 #include "PingMon.h"
 
+#if defined(ARDUINO_ARCH_ESP8266)
+# define HAVE_GLOBALPINGER
+#endif
+
 #ifdef HAVE_GLOBALPINGER
 # include <Pinger.h> /* library: ESP8266-ping */
 static Pinger pinger;
@@ -42,8 +46,8 @@ const PingStats PingTarget::getStats() const
 void PingTarget::update()
 {
     unsigned timePassed = (millis() - _lastResponseMs) / 1000;
-    if (timePassed > 250) {
-        /* go every 4 or so minutes */
+    if (timePassed > 120) {
+        /* go every 2 or so minutes */
     } else if (!_totalResponses) {
         /* if we haven't even started yet */
     } else if ((_totalResponses % 3) != 0 && timePassed >= 1) {
