@@ -18,7 +18,7 @@ String pingmon_util_http_whatsmyip(const char *whatsmyip_url)
     static String ret;
     static long last_update_ms = 0;
     static const char *cached_whatsmyip_url;
-    const long cache_time_ms = (15 * 60 * 1000L); // 15 minutes
+    const long cache_time_ms = (15L * 60L * 1000L); // 15 minutes
 
     if (last_update_ms == 0 ||
           whatsmyip_url != cached_whatsmyip_url ||
