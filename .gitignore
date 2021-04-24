@@ -1,4 +1,4 @@
 *.o
 
 /config.h
-/pe32ping_example.test
+/pe32ping_mod.example

@@ -58,8 +58,9 @@ MqttClient mqttClient(wifiClient);
 #endif //HAVE_WIFI
 
 static PingMon pingmon;
-static const int publishSeconds = 120;
-static unsigned long nextPublish;
+const char guid[] = "577dcafe-d344-41d9-b633-f3f3dc900502";
+
+static inline bool str_non_zero(const char *p) { return p && *p != '\0'; }
 
 
 void setup()
@@ -78,16 +79,11 @@ void setup()
   ensure_mqtt();
 
   pingmon_init();
-  nextPublish = millis() + (publishSeconds * 1000);
 }
 
 void loop()
 {
   pingmon_update();
-  if (millis() > nextPublish) {
-    pingmon_publish();
-    nextPublish = millis() + (publishSeconds * 1000);
-  }
 }
 
 static void ensure_wifi()
@@ -157,9 +153,10 @@ static void pingmon_init()
     return String("192.168.1.1");
 #endif
   });
-  if (pingmon_host0) {
+  if (str_non_zero(pingmon_host0)) {
     pingmon.addTarget("host.0", pingmon_host0);
   }
+  pingmon.setPublish(pingmon_publish);
 }
 
 static void pingmon_update()

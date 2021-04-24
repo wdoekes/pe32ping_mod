@@ -43,7 +43,7 @@ const PingStats PingTarget::getStats() const
     return PingStats(loss, responseTimeMs, ttl);
 }
 
-void PingTarget::update()
+bool PingTarget::update()
 {
     unsigned timePassed = (millis() - _lastResponseMs) / 1000;
     if (timePassed > 120) {
@@ -53,7 +53,7 @@ void PingTarget::update()
     } else if ((_totalResponses % 3) != 0 && timePassed >= 1) {
         /* we're in the middle of a burst of three and a second has passed */
     } else {
-        return; /* else, we wait */
+        return false; /* else, we wait */
     }
 
 #ifdef HAVE_GLOBALPINGER
@@ -83,6 +83,7 @@ void PingTarget::update()
 #endif
     _lastResponseMs = millis();
     _totalResponses += 1;
+    return true;
 }
 
 #ifdef HAVE_GLOBALPINGER

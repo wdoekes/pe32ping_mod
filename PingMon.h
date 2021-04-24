@@ -12,7 +12,8 @@
 
 #include <Arduino.h>
 
-using GetHostnameFunc = String(void); // = function typedef
+using GetHostnameFunc = String(void);   // = function typedef
+using PublishFunc = void(void);         // = function typedef
 
 
 class PingStats {
@@ -66,7 +67,7 @@ public:
         _hostname = hostname;
         _getHostnameFunc = nullptr;
     }
-    void reset(const char *name, GetHostnameFunc getHostnameFunc) {
+    void reset(const char *name, GetHostnameFunc *getHostnameFunc) {
         _init();
         _name = name;
         _getHostnameFunc = getHostnameFunc;
@@ -97,7 +98,9 @@ public:
     }
 
     const PingStats getStats() const;
-    void update();
+
+    inline bool isReady() { return (_totalResponses % 3 == 0); }
+    bool update();
 };
 
 
@@ -106,10 +109,13 @@ private:
     static const unsigned char _maxTargets = 8;
     unsigned char _nTargets;
     unsigned char _curTarget;
+    bool _canPublish;
+    PublishFunc *_publishFunc;
     PingTarget _dests[_maxTargets];
 
 public:
-    PingMon() : _nTargets(0), _curTarget(0) {}
+    PingMon() :
+      _nTargets(0), _curTarget(0), _canPublish(false), _publishFunc(0) {}
 
     unsigned getTargetCount() const { return _nTargets; }
     template<class T> void addTarget(const char *name, T hostnameOrFunc) {
@@ -119,6 +125,9 @@ public:
     }
     PingTarget& getTarget(int i) {
         return _dests[i];
+    }
+    void setPublish(PublishFunc func) {
+        _publishFunc = func;
     }
 
     /**
@@ -130,18 +139,35 @@ public:
      */
     void update() {
         long t0 = millis();
+        bool all_targets_ready = _canPublish;
         unsigned i;
         for (i = 0; i < _nTargets; ++i) {
             unsigned curTarget = (i + _curTarget) % _nTargets;
-            _dests[curTarget].update();
+            if (_dests[curTarget].update()) {
+                _canPublish = true;
+            }
+            all_targets_ready = (
+                all_targets_ready && _dests[curTarget].isReady());
             /* If we're doing more than 500ms, don't attempt to do
              * anything else. */
             if ((millis() - t0) > 500) {
                 ++i; /* start at next */
+                all_targets_ready = false;
                 break;
             }
         }
         _curTarget = (i + _curTarget) % _nTargets;
+
+        if (all_targets_ready) {
+            publish();
+            _canPublish = false;
+        }
+    }
+
+    void publish() {
+        if (_publishFunc) {
+            _publishFunc();
+        }
     }
 };
 
