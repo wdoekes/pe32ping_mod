@@ -3,7 +3,7 @@
 # their type, while the Arduino IDE does not open the .cpp file as well
 # (it already has this file open as the ino file).
 HEADERS = $(wildcard *.h bogoduino/*.h)
-OBJECTS = pe32ping_mod.o PingMon.o PingMonUtil.o \
+OBJECTS = pe32ping_mod.o PingMon.o PingMonUtil.o crc8.o \
 	  bogoduino/Arduino.o bogoduino/WString.o
 
 # --- Test mode ---

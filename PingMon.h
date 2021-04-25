@@ -31,7 +31,7 @@ public:
 
 class PingTarget {
 private:
-    const char *_name;
+    const char *_identifier;  /* TODO? allow F-strings here? */
     mutable String _hostname; /* or IP */
     GetHostnameFunc *_getHostnameFunc;
 
@@ -54,30 +54,30 @@ private:
     }
 
 public:
-    void reset(const char *name, const char* hostname) {
+    void reset(const char *identifier, const char* hostname) {
         _init();
-        _name = name;
+        _identifier = identifier;
         _hostname.remove(0);
         _hostname += hostname;
         _getHostnameFunc = nullptr;
     }
-    void reset(const char *name, String hostname) {
+    void reset(const char *identifier, String hostname) {
         _init();
-        _name = name;
+        _identifier = identifier;
         _hostname = hostname;
         _getHostnameFunc = nullptr;
     }
-    void reset(const char *name, GetHostnameFunc *getHostnameFunc) {
+    void reset(const char *identifier, GetHostnameFunc *getHostnameFunc) {
         _init();
-        _name = name;
+        _identifier = identifier;
         _getHostnameFunc = getHostnameFunc;
     }
 
     const char *getId() const {
-        if (!_name) {
+        if (!_identifier) {
             return "<INVALID>";
         }
-        return _name;
+        return _identifier;
     }
     const String& getHost() const {
         /* TODO: don't call this every time please.. */

@@ -1,5 +1,5 @@
 /**
- * pe32ping_example // ...
+ * pe32ping_mod // ... example ...
  */
 
 /* In config.h, you should have:
