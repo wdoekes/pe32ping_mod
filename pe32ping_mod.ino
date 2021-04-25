@@ -98,14 +98,14 @@ static void ensure_wifi()
       delay(1000);
     }
     if (WiFi.status() == WL_CONNECTED) {
-      Serial.print("Wifi UP on \"");
+      Serial.print(F("Wifi UP on \""));
       Serial.print(wifi_ssid);
-      Serial.print("\", Local IP: ");
+      Serial.print(F("\", Local IP: "));
       Serial.println(WiFi.localIP());
     } else {
-      Serial.print("Wifi NOT UP on \"");
+      Serial.print(F("Wifi NOT UP on \""));
       Serial.print(wifi_ssid);
-      Serial.println("\".");
+      Serial.println(F("\"."));
     }
   }
 #endif //HAVE_WIFI
@@ -117,12 +117,12 @@ static void ensure_mqtt()
   mqttClient.poll();
   if (!mqttClient.connected()) {
     if (mqttClient.connect(mqtt_broker, mqtt_port)) {
-      Serial.print("MQTT connected: ");
+      Serial.print(F("MQTT connected: "));
       Serial.println(mqtt_broker);
     } else {
-      Serial.print("MQTT connection to ");
+      Serial.print(F("MQTT connection to "));
       Serial.print(mqtt_broker);
-      Serial.print(" failed! Error code = ");
+      Serial.print(F(" failed! Error code = "));
       Serial.println(mqttClient.connectError());
     }
   }
@@ -132,9 +132,9 @@ static void ensure_mqtt()
 static void pingmon_init()
 {
   /* Take Cloudflare DNS */
-  pingmon.addTarget("dns.cfl", "1.1.1.1");
+  pingmon.addTarget("dns.cfl", F("1.1.1.1"));
   /* Take Google DNS */
-  pingmon.addTarget("dns.ggl", "8.8.8.8");
+  pingmon.addTarget("dns.ggl", F("8.8.8.8"));
   /* Fetch external IP from whatsmyip/ifconfig.co service */
   pingmon.addTarget("ip.ext", []() {
     return pingmon_util_http_whatsmyip(pingmon_whatsmyip_url);
@@ -150,7 +150,7 @@ static void pingmon_init()
 #ifdef HAVE_WIFI
     return WiFi.gatewayIP().toString();
 #else
-    return String("192.168.1.1");
+    return String(F("192.168.1.1"));
 #endif
   });
   if (str_non_zero(pingmon_host0)) {
@@ -172,7 +172,7 @@ static void pingmon_publish()
 #ifdef HAVE_MQTT
   // Use simple application/x-www-form-urlencoded format.
   mqttClient.beginMessage(mqtt_topic);
-  mqttClient.print("device_id=");
+  mqttClient.print(F("device_id="));
   mqttClient.print(guid);
 #endif
 
@@ -189,12 +189,12 @@ static void pingmon_publish()
     }
     Serial.println();
 #ifdef HAVE_MQTT
-    mqttClient.print("&ping.");
+    mqttClient.print(F("&ping."));
     mqttClient.print(tgt.getId());
-    mqttClient.print("=");
+    mqttClient.print(F("="));
     mqttClient.print(st.responseTimeMs);
     if (st.loss) {
-      mqttClient.print("/");
+      mqttClient.print(F("/"));
       mqttClient.print((unsigned)st.loss);
     }
 #endif

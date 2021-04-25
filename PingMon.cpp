@@ -61,7 +61,7 @@ bool PingTarget::update()
      * leaves me little room to do this properly. */
     if (_onPingResponseTarget != NULL) {
         /* Yes, you got that right. Only one PingMon instance is allowed. */
-        Serial.println("ERROR: Programming error!");
+        Serial.println(F("ERROR: Programming error!"));
     }
     _onPingResponseTarget = this;
     pinger.OnReceive(_onPingResponse);
@@ -70,14 +70,14 @@ bool PingTarget::update()
         while (_onPingResponseTarget) {
             delay(10);
         }
-        Serial.print("DEBUG: Done pinging ");
+        Serial.print(F("DEBUG: Done pinging "));
         Serial.print(getId());
-        Serial.print(", ");
+        Serial.print(F(", "));
         Serial.println(getHost());
     } else {
-        Serial.print("ERROR: Something went wrong with ping to ");
+        Serial.print(F("ERROR: Something went wrong with ping to "));
         Serial.print(getId());
-        Serial.print(", ");
+        Serial.print(F(", "));
         Serial.println(getHost());
     }
 #endif

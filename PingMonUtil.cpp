@@ -39,7 +39,7 @@ String pingmon_util_http_whatsmyip(const String& whatsmyip_url)
         }
         http.end();
 #else
-        ret = "111.222.33.44";
+        ret = F("111.222.33.44");
 #endif
         last_update_ms = millis();
         cached_whatsmyip_url_crc = whatsmyip_url_crc;
