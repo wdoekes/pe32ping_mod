@@ -15,12 +15,12 @@
 /**
  * Return 111.222.33.44 if that's my external IP.
  */
-String pingmon_util_http_whatsmyip(const char *whatsmyip_url)
+String pingmon_util_http_whatsmyip(const String& whatsmyip_url)
 {
     static String ret;
     static long last_update_ms = 0;
     static char cached_whatsmyip_url_crc;
-    char whatsmyip_url_crc = crc8(whatsmyip_url);
+    char whatsmyip_url_crc = crc8(whatsmyip_url.c_str());
     const long cache_time_ms = (15L * 60L * 1000L); // 15 minutes
 
     if (last_update_ms == 0 ||

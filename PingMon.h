@@ -64,7 +64,7 @@ public:
     void reset(const char *identifier, String hostname) {
         _init();
         _identifier = identifier;
-        _hostname = hostname;
+        _hostname = hostname; /* no "const String& hostname" */
         _getHostnameFunc = nullptr;
     }
     void reset(const char *identifier, GetHostnameFunc *getHostnameFunc) {
