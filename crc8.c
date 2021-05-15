@@ -134,10 +134,12 @@ char crc8(const char *p)
 }
 #endif
 
-#if 0
+#if 0 /* Don't forget to enable optimizations -O3 when testing/comparing! */
 #include <stdio.h>
 #include <time.h>
 #include <sys/time.h>
+
+#include "fnv1a.h"
 
 double timeit(void (*f)(), int iterations) {
     struct timespec start, end;
@@ -153,12 +155,17 @@ double timeit(void (*f)(), int iterations) {
 
 const char *the_data;
 
-void crc8_8bit_the_data() {
+void crc8_the_data() {
+    /* With gcc-9 optimizations turned on crc8 runs _slightly_ faster
+     * than fnv1a_32. But only just. */
     crc8(the_data);
 }
 
-void crc8_16bit_the_data() {
-    crc8(the_data);
+void fnv1a_the_data() {
+    /* With gcc-9 optimizations turned on fnv1a_32 runs _slightly_ slower
+     * than crc8. But only just. Note that _without_ optimizations,
+     * fnv1a_32 wins the race by a whopping 5 times. */
+    fnv1a_32(the_data);
 }
 
 int main(int argc, char *argv[])
@@ -170,8 +177,9 @@ int main(int argc, char *argv[])
     }
 
     printf("CRC8: 0x%hhx (%hhu)\n", crc8(the_data), crc8(the_data));
-    printf("[crc8  8 time: %f]\n", timeit(crc8_8bit_the_data, 100000000));
-    printf("[crc8 16 time: %f]\n", timeit(crc8_16bit_the_data, 100000000));
+    printf("FNV-1a: 0x%x (%u)\n", fnv1a_32(the_data), fnv1a_32(the_data));
+    printf("[crc8 : %f]\n", timeit(crc8_the_data, 100000000));
+    printf("[fnv1a: %f]\n", timeit(fnv1a_the_data, 100000000));
     return 0;
 }
 #endif
